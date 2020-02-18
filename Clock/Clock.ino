@@ -105,7 +105,7 @@ void display(int currentMin, int currentHour)
   
 //Display from current min to end of peroid
 
-if((double)EndHour[1] - (double)StartHour[1] > 1.0)
+if((double)EndHour[1] - (double)StartHour[1] <= 1.0 && (double)EndHour[1] - (double)StartHour[1] > 0)
 {
   setWithMin(currentMin,60,255,255,255);
 }
@@ -114,7 +114,7 @@ else
   setWithMin(currentMin,EndMin[1], 255,255,255);
 }
 
- 
+CurrentMin = ++CurrentMin;
  
 }
 
@@ -125,5 +125,6 @@ void loop() {
     //setWithMin(getCurrentPeroid(),getCurrentPeroid()+1, 160,255,128);
     
     display(CurrentMin, CurrentHour);
+    
     
 }
