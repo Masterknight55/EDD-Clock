@@ -6,7 +6,33 @@
 #define NUM_LEDS 144
 #define OFF_SET 40
 #define DATA_PIN 5
-int photocellPin = 5;
+
+//RTC Shit
+#define DS3231
+#define SOFTWARE_WIRE_SDA SDA  // Or whatever other pin you use
+#define SOFTWARE_WIRE_SCL SCL  // Or whatever other pin you use
+#include <time.h>
+#include "RTCtimeUtils.h"
+#ifdef RTC_SOFTWARE_WIRE
+  #include <SoftwareWire.h>
+  #define myWire SoftwareWire
+  myWire I2C(SOFTWARE_WIRE_SDA, SOFTWARE_WIRE_SCL);
+#else
+  #include <Wire.h>
+  #define myWire TwoWire
+  #define I2C Wire
+#endif
+#ifdef DS3231
+  #include <RtcDS3231.h>
+  RtcDS3231<myWire> Rtc(I2C);
+#else
+  #include <RtcDS1307.h>
+  RtcDS1307<myWire> Rtc(I2C);
+#endif
+unsigned long prev_millis = 0;
+unsigned long interval = 1000;
+
+int photocellPin = 1;
 int photocellReading;
 int LEDbrightness;
 
@@ -28,7 +54,49 @@ int CurrentHour = 8;
  
 void setup() { 
     FastLED.addLeds<WS2812B, DATA_PIN, RGB>(leds, NUM_LEDS);
-     Serial.begin(9600);  
+     Serial.begin(9600);
+
+      #ifdef DEBUG
+      Serial.println(F("Setup started."));
+      #endif
+      Rtc.Begin();
+      #define COMPILE_DATE_TIME (__DATE__ " " __TIME__)
+      char* compile_date_time = COMPILE_DATE_TIME;
+     time_t compiled_time_t = str20ToTime(compile_date_time);  // str20ToTime converts a 20 chars date and time string to a time_t value (See it in RtcUtility.h)
+     #ifndef DEBUG
+       if (!Rtc.IsDateTimeValid())
+     #endif
+        {
+     #ifndef DEBUG
+          Serial.println(F("WARNING: RTC invalid time, setting RTC with compile time!"));
+      #else
+          Serial.println(F("DEBUG mode: ALWAYS setting RTC with compile time!"));
+      #endif
+          Rtc.SetTime(&compiled_time_t);
+        }
+        if (!Rtc.GetIsRunning())
+        {
+          Serial.println(F("WARNING: RTC was not actively running, starting it now."));
+          Rtc.SetIsRunning(true);
+        }
+        time_t now = Rtc.GetTime();
+        if (now < compiled_time_t)
+        {
+          Serial.println(F("WARNING: RTC is older than compile time, setting RTC with compile time!"));
+          Rtc.SetTime(&compiled_time_t);
+        }
+        #ifdef DS3231
+        Rtc.Enable32kHzPin(false);
+        Rtc.SetSquareWavePin(DS3231SquareWavePin_ModeNone);
+        #endif
+      
+        #ifdef DEBUG
+          Serial.println(F("Setup done."));
+        #endif
+      
+        Serial.println("");
+
+      
 }
 
 void setBlueAndTurnOff()
@@ -147,13 +215,30 @@ void SetBrightness()
   Serial.println(analogRead(photocellPin));
 }
 
+void RTCStuff()
+{
+  unsigned long current_millis = millis();
+  unsigned long elapsed_millis = current_millis - prev_millis;
+  if (elapsed_millis >= interval - accuracy and elapsed_millis <= interval + accuracy)
+  {
+    prev_millis = prev_millis + interval;
+    time_t now = Rtc.GetTime();
+    Serial.print(F("Arduino time (Y2K based):  "));
+    Serial.println(now);
+    Serial.println(""); 
+}
+
+}
+
+
 
 void loop() {
 
+    RTCStuff();
     //setWithMin(CurrentHour,CurrentHour+1, 160,255,128);
     //setWithMin(getCurrentPeroid(),getCurrentPeroid()+1, 160,255,128);
     
-    SetBrightness();
+    //SetBrightness();
     display(CurrentMin, CurrentHour);
     CurrentMin = CurrentMin + 1;
     if (CurrentMin == 60)
