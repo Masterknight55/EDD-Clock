@@ -90,7 +90,7 @@ unsigned long interval = 1000;
 #define OFF_SET 40
 #define DATA_PIN 5
 
-int photocellPin = 1;
+int photocellPin = 0;
 int photocellReading;
 int LEDbrightness;
 
@@ -247,16 +247,12 @@ void LEDMainLoop()
     //setWithMin(CurrentHour,CurrentHour+1, 160,255,128);
     //setWithMin(getCurrentPeroid(),getCurrentPeroid()+1, 160,255,128);
     
-    //SetBrightness();
+    SetBrightness();
     display(CurrentMin, CurrentHour);
     
     
-    CurrentMin = CurrentMin + 1;
-    if (CurrentMin == 60)
-    {
-      CurrentMin = 0;
-      CurrentHour = CurrentHour +1;
-    }
+    CurrentMin = Rtc.getMinutes();
+    
 
 
   
