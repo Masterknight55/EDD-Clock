@@ -1,7 +1,10 @@
 
-#include "LED.h"
 
-LED ClockLights();
+
+#include "LED.h"
+#include "FastLED.h"
+
+LED ClockLights;
 
 
 
