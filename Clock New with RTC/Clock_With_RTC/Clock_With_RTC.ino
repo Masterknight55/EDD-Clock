@@ -87,11 +87,39 @@ void setGreenWithMin(int start, int end)
 void setWithMin(int start, int end, int color1, int color2, int color3)
 {
   
-  for(int i=convertMinToIndex(start); i<convertMinToIndex(end); i++){
-        leds[i] = CHSV(color1, color2, color3);
-        FastLED.show();
-        //delay(50);
+  //for(int i=convertMinToIndex(start); i<convertMinToIndex(end); i++){
+        
+        // if(!(leds[i] == CHSV(color1, color2, color3)))
+        // {
+        //   leds[i] = CHSV(color1, color2, color3);
+        //   FastLED.show();
+        // }
+
+        for(int i=0; i<60; i++)
+        {
+
+            //In Range
+            if((i <= end) && (i >= start))
+            {
+              if(!(leds[convertMinToIndex(i)] == CHSV(color1, color2, color3)))
+              {
+                leds[convertMinToIndex(i)] = CHSV(color1, color2, color3);                
+              }
+            }
+            else
+            {
+                leds[convertMinToIndex(i)] = CHSV(0, 0, 0);                
+            }
+            
+            
+
+
+
         }
+
+        
+        //delay(50);
+       // }
 
         
 }
@@ -129,20 +157,25 @@ void display(int currentMin, int currentHour)
 {
   
 //Display from current min to end of peroid
-for(int i=0; i<NUM_LEDS; i++){
-        leds[i] = CHSV(0,0,0);
-        FastLED.show();
-    }
+// for(int i=0; i<NUM_LEDS; i++){     
+//         leds[i] = CHSV(0,0,0);
+//         FastLED.show();
+//     }
 
+    //leds[CurrentMin - 1] = CHSV(0,0,0);
+    //FastLED.show();
+
+    setWithMin(currentMin,60,255,255,255);
+    FastLED.show();
     
-if((double)CurrentHour - (double)StartHour[1] <= 1.0 && (double)EndHour[1] - (double)StartHour[1] > 0)
-{
-  setWithMin(currentMin,60,255,255,255);
-}
-else
-{
-  setWithMin(currentMin,EndMin[1], 255,255,255);
-}
+// if((double)CurrentHour - (double)StartHour[1] <= 1.0 && (double)EndHour[1] - (double)StartHour[1] > 0)
+// {
+//   setWithMin(currentMin,60,255,255,255);
+// }
+// else
+// {
+//   setWithMin(currentMin,EndMin[1], 255,255,255);
+// }
 
  
 }
@@ -173,13 +206,9 @@ void SetBrightness()
 void LEDMainLoop() 
 {
 
-    //setWithMin(CurrentHour,CurrentHour+1, 160,255,128);
-    //setWithMin(getCurrentPeroid(),getCurrentPeroid()+1, 160,255,128);
-    
     SetBrightness();
     display(CurrentMin, CurrentHour);
-    
-  
+      
 }
 
 
@@ -232,6 +261,9 @@ void RTCMainLoop()
   Serial.println();
       } 
     delay(1000);
+
+    CurrentMin = now.minute();
+    CurrentHour = now.hour();
 }
 
 
