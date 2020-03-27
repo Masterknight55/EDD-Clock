@@ -2,14 +2,14 @@
 
 
 #include "LED.h"
-#include "FastLED.h"
+
 
 LED ClockLights;
 
 
 
 void setup() {
-  ClockLights.init();
+  //ClockLights.init();
   // put your setup code here, to run once:
   
   
@@ -18,6 +18,6 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  ClockLights.TurnAllBlue();
+  //ClockLights.TurnAllBlue();
 
 }
